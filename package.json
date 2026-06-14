@@ -1,13 +1,19 @@
 {
   "name": "git-vector",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Low-latency multi-repository Git telemetry and drift analysis engine.",
   "main": "index.js",
   "type": "module",
   "bin": {
     "git-vector": "./index.js"
   },
-  "keywords": ["git", "cli", "telemetry", "productivity", "automation"],
+  "keywords": [
+    "git",
+    "cli",
+    "telemetry",
+    "productivity",
+    "automation"
+  ],
   "author": "Aria Yadav <aaravayadav@outlook.com>",
   "license": "MIT",
   "dependencies": {
