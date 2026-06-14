@@ -149,6 +149,11 @@ async function main() {
     console.log(pc.magenta(EASTER_EGG_ART));
     process.exit(0); // Safely terminate process immediately after printing art
   }
+    if (args.includes('--h') || args.includes('-h')) {
+    console.log('git-vector -d, --d : change target directory');
+    console.log('git-vector -n, --n : ?');
+    process.exit(0); // Safely terminate process immediately after printing art
+  }
 
   const requiresPathReset = args.includes('--d') || args.includes('-d');
 
