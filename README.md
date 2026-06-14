@@ -4,10 +4,13 @@ A low-latency, high-throughput multi-repository Git telemetry and drift analysis
 
 `git-vector` maps your localized workspace clusters as a dynamic coordinate field, simultaneously quantifying untracked modification vectors and tracking asynchronous upstream ahead/behind divergence metrics without terminal credential hijacking.
 
-'git-vector' in terminal to run
-'git-vector -h' for help 
-'git-vector -d' to change target dir
-'git-vector' -n' for vampire
+`git-vector` in terminal to run.
+
+`git-vector -h` for help. 
+
+`git-vector -d` to change target dir.
+
+`git-vector -n` for vampire.
 
 ---
 
