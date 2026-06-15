@@ -7,6 +7,13 @@
   "bin": {
     "git-vector": "index.js"
   },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ayadav348/git-vector.git"
+  },
   "keywords": [
     "git",
     "cli",
@@ -16,6 +23,10 @@
   ],
   "author": "Aria Yadav <aaravayadav@outlook.com>",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ayadav348/git-vector/issues"
+  },
+  "homepage": "https://github.com/ayadav348/git-vector#readme",
   "dependencies": {
     "picocolors": "^1.1.1"
   }
