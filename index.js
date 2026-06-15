@@ -7,6 +7,7 @@ import path from 'path';
 import os from 'os';
 import readline from 'readline';
 import pc from 'picocolors';
+import pkg from './package.json' with { type: 'json' };
 
 const execFileAsync = promisify(execFile);
 
@@ -160,6 +161,10 @@ async function main() {
     console.log('git-vector -d, --d : change target directory');
     console.log('git-vector -n, --n : ?');
     process.exit(0); 
+  }
+  if (args.includes('--v') || args.includes('-v')) {
+    console.log(`v${pkg.version}`);
+    process.exit(0);
   }
 
   const requiresPathReset = args.includes('--d') || args.includes('-d');
