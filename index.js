@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs/promises';
 import path from 'path';
@@ -8,7 +8,7 @@ import os from 'os';
 import readline from 'readline';
 import pc from 'picocolors';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 // Cross-Platform Configuration Persistence Path Setup
 const CONFIG_DIR = path.join(
@@ -21,7 +21,7 @@ const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
 const EASTER_EGG_ART = `
 ⠀⠀⠀⠀⠀⢀⠀⠀⡀⠀⢈⠀⠀⣀⠴⢉⡰⢊⡥⠀⢄⠠⣰⠋⠄⣰⠞⢰⠋⢠⢀⡐⢰⠠⠀⠄⠂⠌⡀⢻⡜⡆⠠⡐⠈⠄⢳⣀⠂⡹⣆⠠⠐⠠⢂⠙⡄⠠⠐⠠⢉⢢⡠⠙⡽⣆⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⢈⠀⠀⡀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠠⠀⠀⠄⠀⠠⠀⣠⠊⣤⢊⠴⠁⢄⠨⢀⡼⠃⠌⣸⠋⢠⡏⠐⠠⡀⠐⣸⠀⠡⠌⢢⠁⡐⢸⣿⠷⠀⠠⠡⢈⠘⣧⠈⢧⢻⡄⡉⢣⣣⡠⢹⡆⠁⠆⡀⠂⠳⣆⣈⢎⢿⣄⣠⣀⣀⠤⠤⠤⣀⣈⠀⠀⡁⠀⠄⠀⠠⠀⠀⠄⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠠⠀⠀⠄⣰⠁⢤⠗⡁⢂⠉⠄⠂⣼⡏⠐⢠⡿⢀⣼⡅⠈⢄⢰⡁⢺⠀⠡⠌⢸⠠⠐⡀⣿⣿⠀⡁⠢⠁⢂⢼⡂⣄⡈⡧⠐⠨⡔⡑⡀⢹⡈⠄⢡⠁⢆⠀⠱⡋⠀⢻⡖⠡⠤⠴⠮⠭⢍⡩⠂⠀⠄⠀⠠⠀⠀⠀⠠⠀⠀⠄⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠠⠀⠀⠄⣰⠁⢤⠗⡁⢂⠉⠄⠂⣼⡏⠐⢠⡿⢀⣼⡅⠈⢄⢰⡁⢺⠀⠡⠌⢸⠠⠐⡀⣿⣿⠀⡁⠢⠁⢂⢼⡂⣄⡈⡧⠐⠨⡔⡑⡀⢹⡈⠄⢡⠁⢆⠀⠱⡋⠀⢻⡆⠠⠦⠴⣴⡒⠄⠷⠦⡂⠀⠐⠀⠂⠀⠐⠀⠀⠂⠀⠐⠀⠀
 ⠀⠀⠀⠐⠀⠀⠂⠐⠀⠀⡺⠁⡴⢋⠀⢐⠌⣐⡬⢼⠟⢠⡎⣸⡃⢨⠋⠠⠁⠂⣾⠀⢳⠀⢂⠘⣸⢀⣃⣤⠷⣿⡺⣵⣷⡟⣿⣹⣏⢷⡹⣿⢽⡳⣿⢦⣳⣈⢷⡈⠄⡈⢼⠀⢥⢃⡄⠀⢻⡆⠠⠦⠴⣴⡒⠄⠷⠦⡂⠀⠐⠀⠂⠀⠐⠀⠀⠂⠀⠐⠀⠀
 ⢀⠁⠒⠊⠤⣀⡁⠀⠈⢰⢃⡼⠑⠠⢐⡡⠚⠡⢰⣏⢡⢻⢁⡿⠁⠀⡈⣐⠁⢂⡗⠈⢼⣰⢦⢾⣹⣸⣓⢮⣛⣽⢳⡼⢥⣿⣿⡜⣯⢶⡹⣻⢮⢵⢻⣮⢵⣏⢿⡽⣲⠶⡜⡆⠘⣎⠘⡌⢆⣿⡷⠷⠶⡶⠮⢽⢄⠀⠁⠈⢈⠀⠁⠀⠈⠀⠀⡁⠀⠈⠀⠀
 ⠂⠈⠉⢒⠒⠠⠵⣦⡠⡞⡰⠠⣨⠖⡑⠌⡐⢁⡿⠈⠀⡜⣸⡏⠰⠀⡔⡏⢐⣬⣿⡞⣽⢻⣏⠶⣹⣷⢭⡞⣥⣿⢧⣛⢾⣏⣿⠼⣟⣎⢷⣹⢏⡾⣹⣯⢞⡿⣮⣽⡖⣯⢽⣻⣏⡿⣄⣳⠸⣸⡙⣦⠀⠌⠀⠠⠀⠀⠄⠠⠠⠀⢄⠀⠠⠀⠀⠄⠀⠠⠀⠀
@@ -29,7 +29,7 @@ const EASTER_EGG_ART = `
 ⡴⣺⠏⢁⣪⣽⣳⣝⣮⣽⠅⡒⠊⠍⡙⠒⡀⣾⠀⢰⠡⠒⢸⣽⡎⡶⣏⣿⣷⢳⡺⣽⡵⣻⡏⣟⣼⠟⣯⡷⠏⠻⢞⢟⡿⠇⢓⠛⠳⠞⣓⣺⠷⢒⣛⣓⢻⡿⣼⣇⣟⡳⡭⣽⣷⡿⣥⣻⢼⣧⡗⠈⠌⢷⡄⠂⠂⠐⠀⠀⠂⠀⠐⠀⠀⠂⠐⠐⠀⠂⠀⠐
 ⡽⢁⣴⡿⣫⡿⠑⢮⢖⣻⣆⠠⢁⠒⠠⡁⢬⡇⠂⠌⡠⠑⠸⡏⣷⣛⢶⣹⣿⣧⣝⣿⠷⠛⠓⠚⠒⠒⠲⠛⠿⠆⠶⠭⠀⠉⠀⠊⠐⠸⠟⠋⠉⡀⠀⠈⠉⠉⠛⠛⢾⡿⣕⠛⢿⣳⣥⣿⣻⣿⡉⢳⡀⢂⢻⡁⠀⢈⠀⠀⡁⠀⢈⠀⠀⡁⠀⢈⠀⠀⠀⠈
 ⢃⡞⡽⣼⠋⠠⠌⢠⡟⣾⢳⠳⣄⠊⡐⠄⢺⡏⠐⢂⢱⡌⠐⢿⣟⣯⢮⣵⡿⠟⠋⠀⠀⠀⠀⢀⡶⣞⣳⣤⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣞⢿⢽⢳⡀⠀⠀⠀⠀⠈⠹⢿⣻⣦⣼⡿⣽⢻⣧⠐⡈⣿⡄⠨⣯⠄⠀⡀⠀⠄⠀⠠⠀⠀⠄⠀⠀⠀⠀⠀⠀
-⢾⡄⢳⡟⠠⢁⡘⣼⠽⢯⣻⣧⡈⠳⣄⡌⣸⠅⡘⢀⢺⡀⢡⠈⣿⣼⢻⡞⠁⠀⠀⠀⠀⠀⠀⢸⡙⣼⡻⣸⠂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢯⣚⣛⡼⠁⠀⠀⠀⠀⠀⠀⢨⡿⢿⡿⣜⢧⢫⣿⠀⠄⡷⣳⠀⢼⡆⠀⠄⠠⠠⠀⠐⠀⠠⠀⠀⠄⠀⠠⠀⠀
+⡄⢳⡟⠠⢁⡘⣼⠽⢯⣻⣧⡈⠳⣄⡌⣸⠅⡘⢀⢺⡀⢡⠈⣿⣼⢻⡞⠁⠀⠀⠀⠀⠀⠀⢸⡙⣼⡻⣸⠂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢯⣚⣛⡼⠁⠀⠀⠀⠀⠀⠀⢨⡿⢿⡿⣜⢧⢫⣿⠀⠄⡷⣳⠀⢼⡆⠀⠄⠠⠠⠀⠐⠀⠠⠀⠀⠄⠀⠠⠀⠀
 ⠀⣳⢠⣇⣢⣵⢮⠑⡁⢸⡖⣯⢿⡦⣌⠙⣿⡐⠠⡁⢸⣇⣠⢁⡈⢿⣟⠀⠀⠀⠀⠀⠀⠀⠀⠀⢙⣒⣾⡥⡶⠤⠀⠀⠀⠀⠀⠀⠀⠀⠰⠶⠾⡤⢄⣀⠀⠀⠀⠀⠀⢀⠞⠀⢸⡽⣟⣮⢳⣏⠐⠤⣟⣿⡌⢀⣷⠀⠂⠀⡁⠀⢈⠀⠀⡁⠀⠀⠀⠀⠀⠀
 ⠊⢰⡟⠁⠄⡈⢿⣯⢄⠀⣿⡭⣷⢻⣭⣿⣿⠀⡡⠐⡀⣯⠄⡞⠉⡁⢿⡢⢄⡀⠀⣀⣠⡴⠒⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠱⠶⡦⣴⡁⠂⡄⢺⡵⢻⣽⡾⠁⠌⣼⣻⣟⡇⡀⢽⡄⡁⠀⢈⠀⠀⠀⢀⠀⠀⡁⠀⠀⠀⠀
 ⠀⣺⠁⠰⢀⠁⢞⣿⠎⠀⡹⣧⣛⣾⠟⠉⣽⠀⠃⡄⠡⢹⡄⢷⡀⠡⡌⠳⣌⢱⡶⠟⠛⠁⢀⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠁⠉⡇⡄⠇⠸⣷⢎⣿⠇⢂⣰⣯⣿⢻⢅⡇⠘⣷⡁⠀⢈⠀⠀⠀⢈⠀⠀⡁⠀⠀⠀⠀
@@ -55,9 +55,9 @@ const askQuestion = (query) => {
   }));
 };
 
-async function runCommand(cmd, dir) {
+async function runCommand(file, args, dir) {
   try {
-    const { stdout } = await execAsync(cmd, { 
+    const { stdout } = await execFileAsync(file, args, { 
       cwd: dir,
       env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } 
     });
@@ -96,6 +96,12 @@ async function getOrSetupTargetRoot(forceReset = false) {
     }
     resolvedPath = path.resolve(resolvedPath);
 
+    // Root Guardrail: Disallow targeting system root drives
+    if (resolvedPath === '/' || resolvedPath === 'C:\\') {
+      console.log(pc.red('[!] Critical Error: Targeting system root is restricted. Try a subfolder.'));
+      continue;
+    }
+
     try {
       const stats = await fs.stat(resolvedPath);
       if (stats.isDirectory()) {
@@ -120,17 +126,18 @@ async function getOrSetupTargetRoot(forceReset = false) {
 async function analyzeRepository(repoPath) {
   const repoName = path.basename(repoPath);
   
-  const statusOutput = await runCommand('git status --porcelain', repoPath);
+  const statusOutput = await runCommand('git', ['status', '--porcelain'], repoPath);
   if (statusOutput === null) return null; 
   
-  const uncommittedCount = statusOutput ? statusOutput.split('\n').length : 0;
-  const currentBranch = await runCommand('git branch --show-current', repoPath) || 'detached';
+  // Logical Fix: Filter Boolean loops out empty values from splitting empty output arrays
+  const uncommittedCount = statusOutput ? statusOutput.split('\n').filter(Boolean).length : 0;
+  const currentBranch = await runCommand('git', ['branch', '--show-current'], repoPath) || 'detached';
 
-  const fetchAttempt = await runCommand('git fetch --dry-run', repoPath);
+  const fetchAttempt = await runCommand('git', ['fetch', '--dry-run'], repoPath);
   
   let ahead = 0, behind = 0;
   if (fetchAttempt !== null) {
-    const upstreamCheck = await runCommand('git rev-list --left-right --count HEAD...@{u}', repoPath);
+    const upstreamCheck = await runCommand('git', ['rev-list', '--left-right', '--count', 'HEAD...@{u}'], repoPath);
     if (upstreamCheck) {
       [ahead, behind] = upstreamCheck.split('\t').map(Number);
     }
@@ -147,12 +154,12 @@ async function main() {
   // --- 🎭 Intercept and Process Easter Egg Flag Matrix ---
   if (args.includes('--n') || args.includes('-n')) {
     console.log(pc.magenta(EASTER_EGG_ART));
-    process.exit(0); // Safely terminate process immediately after printing art
+    process.exit(0); 
   }
-    if (args.includes('--h') || args.includes('-h')) {
+  if (args.includes('--h') || args.includes('-h')) {
     console.log('git-vector -d, --d : change target directory');
     console.log('git-vector -n, --n : ?');
-    process.exit(0); // Safely terminate process immediately after printing art
+    process.exit(0); 
   }
 
   const requiresPathReset = args.includes('--d') || args.includes('-d');
@@ -217,3 +224,4 @@ async function main() {
 }
 
 main();
+
