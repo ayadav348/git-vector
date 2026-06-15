@@ -1,5 +1,7 @@
 # ⚔️ git-vector
 
+[![npm version](https://img.shields.io/npm/v/git-vector.svg?style=flat-rounded)](https://www.npmjs.com/package/git-vector)
+
 A low-latency, high-throughput multi-repository Git telemetry and drift analysis engine built in Node.js. 
 
 `git-vector` maps your localized workspace clusters as a dynamic coordinate field, simultaneously quantifying untracked modification vectors and tracking asynchronous upstream ahead/behind divergence metrics without terminal credential hijacking.
