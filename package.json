@@ -1,6 +1,6 @@
 {
   "name": "git-vector",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Low-latency multi-repository Git telemetry and drift analysis engine.",
   "main": "index.js",
   "type": "module",
